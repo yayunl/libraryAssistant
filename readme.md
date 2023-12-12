@@ -8,10 +8,10 @@ The application also offers an API to get the list price of a book per its ISBN.
 1. Clone the repository
 2. Install the requirements
 3. Run the application
-4. Open the browser and go to http://localhost:8000
+4. Open the browser and go to http://localhost:8080
 
 ## Usage
-1. Check list price of a book by its ISBN: http://localhost:8000/ISBN/9781603090575
-2. (*)Check the list of books checked out by a user: http://localhost:8000/history/1
-3. (*)Check the total savings of a user: http://localhost:8000/savings/1   
+1. Check list price of a book by its ISBN: http://localhost:8080/ISBN/9781603090575
+2. (*)Check the list of books checked out by a user: http://localhost:8080/history/1
+3. (*)Check the total savings of a user: http://localhost:8080/savings/1   
    *: Note that the last digit in the URLs of Usage #2 and #3 is the pagination number.   
