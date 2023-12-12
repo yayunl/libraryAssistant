@@ -1,7 +1,7 @@
 # LibraryAssistant
 
 ## Description
-This is a library assistant that helps you to get the checked out books in the library account and calculate the total savings you have made by borrowing books from the library instead of buying them.
+This is a library assistant that helps you to get the checked out books in the library account (Round Rock Public Library) and calculate the total savings you have made by borrowing books from the library instead of buying them.
 The application also offers an API to get the list price of a book per its ISBN.
 
 ## Installation
