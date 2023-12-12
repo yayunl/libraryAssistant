@@ -12,6 +12,6 @@ The application also offers an API to get the list price of a book per its ISBN.
 
 ## Usage
 1. Check list price of a book by its ISBN: http://localhost:8000/ISBN/9781603090575
-2. Check the list of books checked out by a user: http://localhost:8000/history/1
-3. Check the total savings of a user: http://localhost:8000/savings/1
-   (Note: the last digit in the URLs of Usage #2 and #3 is the pagination number)
+2. (*)Check the list of books checked out by a user: http://localhost:8000/history/1
+3. (*)Check the total savings of a user: http://localhost:8000/savings/1   
+   *: Note that the last digit in the URLs of Usage #2 and #3 is the pagination number.   
