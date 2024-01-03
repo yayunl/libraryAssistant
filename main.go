@@ -2,20 +2,33 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
-	"strconv"
+	"time"
 )
 
-var sessionCookie string
+var (
+	sessionCookie   string
+	totalPagination int
+)
 
 func init() {
 	result, cookie := login()
 	if result {
 		sessionCookie = cookie
+		fmt.Println("Login successfully")
+		// Get the total pagination
+		var err error
+		totalPagination, err = extractTotalPagination(sessionCookie)
+		if err != nil {
+			panic(errors.New("cannot get total pagination"))
+		}
 	} else {
 		panic("Login failed")
 	}
+
 }
 
 func main() {
@@ -44,24 +57,6 @@ func main() {
 	// Get the history of checked out books
 	mux.HandleFunc("/history/", func(w http.ResponseWriter, r *http.Request) {
 		// get the pagination from the URL
-		totalPaginationEntry := r.URL.Path[len("/history/"):]
-		var totalPagination int
-		if totalPaginationEntry == "" {
-			totalPagination = 1
-		} else {
-			totalPage, err := strconv.ParseInt(totalPaginationEntry, 16, 0)
-			if err != nil {
-				// Handle the error if the conversion fails
-				fmt.Println("Error converting string to int:", err)
-				return
-			}
-			totalPagination = int(totalPage)
-		}
-
-		if sessionCookie == "" {
-			w.Write([]byte("Please login first"))
-			return
-		}
 		books := readBookHistoryList(sessionCookie, totalPagination)
 		// convert the map to JSON
 		resJson, err := json.MarshalIndent(books, "", "  ")
@@ -71,25 +66,47 @@ func main() {
 		}
 		w.Write(resJson)
 	})
+
 	// Get total savings
 	mux.HandleFunc("/savings/", func(w http.ResponseWriter, r *http.Request) {
 		// get the pagination from the URL
-		totalPaginationEntry := r.URL.Path[len("/history/"):]
-		var totalPagination int
-		if totalPaginationEntry == "" {
-			totalPagination = 1
-		} else {
-			totalPage, err := strconv.ParseInt(totalPaginationEntry, 16, 0)
-			if err != nil {
-				// Handle the error if the conversion fails
-				fmt.Println("Error converting string to int:", err)
-				return
-			}
-			totalPagination = int(totalPage)
+		startTime := time.Now()
+
+		total := calculateTotalSavings(sessionCookie, totalPagination)
+		endTime := time.Now()
+		totalTime := endTime.Sub(startTime)
+		var response = map[string]interface{}{
+			"message": "Total savings in USD",
+			"total":   fmt.Sprintf("$%.2f", total),
+			"time":    fmt.Sprintf("%vs", totalTime),
+		}
+		// convert the map to JSON
+		resJson, err := json.MarshalIndent(response, "", "  ")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Write(resJson)
+	})
+
+	// Get the checked out books
+	mux.HandleFunc("/due/", func(w http.ResponseWriter, r *http.Request) {
+		books, _ := checkedOutBooks(sessionCookie)
+		response := map[string]interface{}{
+			"message": "Checked-out books",
+			"books":   books,
 		}
 
-		total := totalSavings(sessionCookie, totalPagination)
-		w.Write([]byte(fmt.Sprintf("At least saved: $%.2f", total)))
+		jsonResponse, err := json.MarshalIndent(response, "", "  ")
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			log.Println("Error marshaling JSON response:", err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonResponse)
 	})
+
 	http.ListenAndServe(":8080", mux)
 }
